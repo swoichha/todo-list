@@ -59,3 +59,14 @@ export const addTodo = async ({
     console.error("Error adding todo:", error);
   }
 };
+
+export const deleteTodo = async (id: string): Promise<boolean> => {
+  const { error } = await supabase.from("todos").delete().eq("id", id);
+
+  if (error) {
+    console.error("Error deleting todo:", error);
+    return false;
+  }
+
+  return true;
+};
