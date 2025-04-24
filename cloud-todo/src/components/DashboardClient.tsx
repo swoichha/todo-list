@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,9 +18,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
-import { addTodo, fetchTodos, deleteTodo } from "@/lib/todoActions";
+import { addTodo, fetchTodos, deleteTodo, updateTodo } from "@/lib/todoActions";
 
-interface Todo {
+export interface Todo {
   id: string;
   title: string;
   description?: string;
@@ -36,9 +36,26 @@ export default function DashboardClient() {
     description: "",
     due_date: "",
   });
+  const [currentTodo, setCurrentTodo] = useState<Todo>({
+    id: "",
+    title: "",
+    description: "",
+    due_date: "",
+    is_completed: false,
+    created_at: "",
+  });
 
   const [todoToDelete, setTodoToDelete] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // State for edit mode
+  const [dialogTodo, setDialogTodo] = useState<Todo>({
+    id: "",
+    title: "",
+    description: "",
+    due_date: "",
+    is_completed: false,
+    created_at: "",
+  });
 
   const handleAddTodo = async () => {
     if (!newTodo.title.trim()) return;
@@ -49,15 +66,43 @@ export default function DashboardClient() {
     setNewTodo({ title: "", description: "", due_date: "" });
   };
 
+  const handleEditTodo = (todo: Todo) => {
+    setIsDialogOpen(true); // Open the dialog when editing
+    setDialogTodo(todo); // Pass the todo to the dialog form
+  };
+
+  const handleSaveEditedTodo = async () => {
+    if (!dialogTodo.title.trim()) return;
+
+    try {
+      const updatedTodo = await updateTodo(dialogTodo.id, dialogTodo);
+
+      if (updatedTodo) {
+        const updatedTodos = await fetchTodos();
+        setTodos(updatedTodos);
+        setIsDialogOpen(false); // Close the dialog after saving
+        setDialogTodo({
+          id: "",
+          title: "",
+          description: "",
+          due_date: "",
+          is_completed: false,
+          created_at: "",
+        });
+      }
+    } catch (error) {
+      console.error("Error in handleSaveEditedTodo:", error);
+    }
+  };
+
   const handleConfirmDelete = async () => {
     if (todoToDelete) {
       const success = await deleteTodo(todoToDelete);
       if (success) {
         setTodos((prev) => prev.filter((todo) => todo.id !== todoToDelete));
-        setTodoToDelete(null);
+        setTodoToDelete(null); // Close delete dialog after delete
       }
     }
-    setIsDialogOpen(false);
   };
 
   useEffect(() => {
@@ -75,7 +120,7 @@ export default function DashboardClient() {
       {/* Add Todo Form */}
       <Card>
         <CardHeader>
-          <CardTitle>Add a New Todo</CardTitle>
+          <CardTitle>{isEditing ? "Edit Todo" : "Add a New Todo"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -118,40 +163,41 @@ export default function DashboardClient() {
           <Card key={todo.id} className="shadow-md">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-xl">{todo.title}</CardTitle>
-              <AlertDialog
-                open={isDialogOpen && todoToDelete === todo.id}
-                onOpenChange={setIsDialogOpen}
-              >
-                <AlertDialogTrigger asChild>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => {
-                      setTodoToDelete(todo.id);
-                      setIsDialogOpen(true);
-                    }}
-                  >
-                    Delete
-                  </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      If you proceed, this task will be permanently deleted and
-                      cannot be recovered.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel onClick={() => setTodoToDelete(null)}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction onClick={handleConfirmDelete}>
-                      Yes, Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              {/* Button container to align buttons side by side */}
+              <div className="flex space-x-2">
+                <Button onClick={() => handleEditTodo(todo)}>Edit</Button>
+                <AlertDialog
+                  open={todoToDelete === todo.id} // Open only when deleting specific todo
+                  onOpenChange={(isOpen) => !isOpen && setTodoToDelete(null)} // Close dialog when closed
+                >
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={() => setTodoToDelete(todo.id)} // Open dialog with the correct todo id
+                    >
+                      Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        If you proceed, this task will be permanently deleted
+                        and cannot be recovered.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel onClick={() => setTodoToDelete(null)}>
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction onClick={handleConfirmDelete}>
+                        Yes, Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             </CardHeader>
             <CardContent>
               <p className="text-sm text-muted-foreground mb-2">
@@ -167,6 +213,58 @@ export default function DashboardClient() {
           </Card>
         ))}
       </div>
+
+      {/* Edit Todo Dialog */}
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Edit Todo</AlertDialogTitle>
+            <AlertDialogDescription>
+              Modify your task details below:
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Title</Label>
+              <Input
+                value={dialogTodo.title}
+                onChange={(e) =>
+                  setDialogTodo({ ...dialogTodo, title: e.target.value })
+                }
+                placeholder="Task title..."
+              />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Textarea
+                value={dialogTodo.description || ""}
+                onChange={(e) =>
+                  setDialogTodo({ ...dialogTodo, description: e.target.value })
+                }
+                placeholder="Task description"
+              />
+            </div>
+            <div>
+              <Label>Due Date</Label>
+              <Input
+                type="datetime-local"
+                value={dialogTodo.due_date || ""}
+                onChange={(e) =>
+                  setDialogTodo({ ...dialogTodo, due_date: e.target.value })
+                }
+              />
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleSaveEditedTodo}>
+              Save Changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </main>
   );
 }

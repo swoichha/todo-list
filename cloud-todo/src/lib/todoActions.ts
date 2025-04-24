@@ -70,3 +70,25 @@ export const deleteTodo = async (id: string): Promise<boolean> => {
 
   return true;
 };
+
+export const updateTodo = async (
+  todoId: string,
+  updatedTodo: { title: string; description?: string; due_date?: string }
+) => {
+  const { data, error } = await supabase
+    .from("todos")
+    .update({
+      title: updatedTodo.title,
+      description: updatedTodo.description,
+      due_date: updatedTodo.due_date,
+    })
+    .eq("id", todoId)
+    .single(); // Update the specific todo by its id
+
+  if (error) {
+    console.error("Error updating todo:", error);
+    return null;
+  }
+
+  return data; // Return the updated todo data if successful
+};
