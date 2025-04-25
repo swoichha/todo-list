@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/router"; // Import useRouter
 import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
-  AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
+  AlertDialogFooter,
 } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -19,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { addTodo, fetchTodos, deleteTodo, updateTodo } from "@/lib/todoActions";
+import LogOut from "./Logout";
 
 export interface Todo {
   id: string;
@@ -163,18 +165,17 @@ export default function DashboardClient() {
           <Card key={todo.id} className="shadow-md">
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle className="text-xl">{todo.title}</CardTitle>
-              {/* Button container to align buttons side by side */}
               <div className="flex space-x-2">
                 <Button onClick={() => handleEditTodo(todo)}>Edit</Button>
                 <AlertDialog
-                  open={todoToDelete === todo.id} // Open only when deleting specific todo
-                  onOpenChange={(isOpen) => !isOpen && setTodoToDelete(null)} // Close dialog when closed
+                  open={todoToDelete === todo.id}
+                  onOpenChange={(isOpen) => !isOpen && setTodoToDelete(null)}
                 >
                   <AlertDialogTrigger asChild>
                     <Button
                       variant="destructive"
                       size="sm"
-                      onClick={() => setTodoToDelete(todo.id)} // Open dialog with the correct todo id
+                      onClick={() => setTodoToDelete(todo.id)}
                     >
                       Delete
                     </Button>
