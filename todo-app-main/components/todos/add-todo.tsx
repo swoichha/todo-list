@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addTodo } from "@/actions/todos/actions";
 import {
   Select,
   SelectTrigger,
+  SelectValue,
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
@@ -15,6 +16,7 @@ import { toast } from "sonner";
 
 export default function AddTodo() {
   const ref = useRef<HTMLFormElement>(null);
+  const [priority, setPriority] = useState("medium"); // State for priority
 
   const handleSubmit = async (formData: FormData) => {
     const task = formData.get("task") as string;
@@ -25,8 +27,11 @@ export default function AddTodo() {
     }
 
     try {
+      // Include priority in form data
+      formData.append("priority", priority);
       await addTodo(formData);
       ref.current?.reset();
+      setPriority("medium"); // Reset to default after submission
       toast.success("Task added successfully");
     } catch (error) {
       toast.error("Failed to add task");
@@ -61,9 +66,9 @@ export default function AddTodo() {
           >
             Priority
           </label>
-          <Select name="priority" defaultValue="medium">
+          <Select value={priority} onValueChange={setPriority}>
             <SelectTrigger className="w-full">
-              <span className="truncate">Select priority</span>
+              <SelectValue placeholder="Select priority" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="low">Low</SelectItem>
