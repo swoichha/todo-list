@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-main
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: todo-app-main
+  template:
+    metadata:
+      labels:
+        app: todo-app-main
+    spec:
+      containers:
+      - name: todo-app-main
+        image: swoichha/todo-app-main:latest  # Updated to Docker Hub
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - name: todo-storage
+          mountPath: /app/.next/cache
+      volumes:
+      - name: todo-storage
+        persistentVolumeClaim:
+          claimName: todo-app-main-pvc

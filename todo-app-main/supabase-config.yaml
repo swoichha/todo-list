@@ -1,0 +1,30 @@
+# supabase-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supabase-config
+data:
+  NEXT_PUBLIC_SUPABASE_URL: "https://sjrwjctowjtvasrnvyvt.supabase.co"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: supabase-secrets
+stringData:
+  DATABASE_URL: "postgresql://postgres:Spring#2025@db.sjrwjctowjtvasrnvyvt.supabase.co:5432/postgres"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: todo-app-main
+spec:
+  template:
+    spec:
+      containers:
+      - name: todo-app-main
+        image: swoichha/todo-app:latest
+        envFrom:
+          - configMapRef:
+              name: supabase-config
+          - secretRef:
+              name: supabase-secrets
