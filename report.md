@@ -297,6 +297,7 @@ There are many other features that have implemented like:
 - Completed task: Using a checkbox user can mark the task as completed
 - Delete: User can delete any task by marking a task is checked as comlplete and clicking on `Clear Completed` button or can delete all the task in the list by clicking on the `Clear All` button
 - Priority: While creating a task user can assign the priory for each task and the list of task will be sorted based on the priority level followed by the deadling in case two or more task have same level of priority.
+
 ## **8. Troubleshooting**
 | Issue | Solution |
 |-------|----------|
@@ -316,3 +317,18 @@ We successfully built and deployed a **scalable To-Do app** using:
 **Future Improvements**:
 - Implement push notifications for due dates.
 - Set up CI/CD with GitHub Actions.
+
+## UI
+
+**Welcome page**:
+
+<img width="570" alt="Screenshot 2025-04-25 at 10 31 38 PM" src="https://github.com/user-attachments/assets/b5cba968-66f3-46e8-b1dc-32aef02ff1cc" />
+
+
+**Sign Up page**:
+
+<img width="567" alt="Screenshot 2025-04-25 at 10 32 04 PM" src="https://github.com/user-attachments/assets/925cda02-867e-4fc2-a565-c20d49fa02ec" />
+
+**Dashboard page**
+
+<img width="1003" alt="Screenshot 2025-04-25 at 10 32 45 PM" src="https://github.com/user-attachments/assets/6910b642-1c10-4413-9568-2b0be06ae0f1" />
