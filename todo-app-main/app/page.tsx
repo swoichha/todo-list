@@ -22,7 +22,7 @@ export default async function Home() {
             <div className="flex items-center gap-4">
               <CheckCircleIcon className="h-8 w-8 text-blue-500 dark:text-blue-400" />
               <h1 className="font-bold text-2xl text-gray-800 dark:text-white">
-                My Todo List
+                My Todo Lists
               </h1>
             </div>
             <SignOutButton />
